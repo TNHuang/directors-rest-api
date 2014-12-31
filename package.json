@@ -1,0 +1,14 @@
+{
+  "name": "directors-api",
+  "main": "server.js",
+  "description": "store directors information in a restful manner using mongoDB",
+  "version": "0.0.1",
+  "dependencies": {
+    "body-parser": "~1.0.1",
+    "crypto": "0.0.3",
+    "express": "~4.0.0",
+    "method-override": "~2.0.2",
+    "mongoose": "~3.6.13",
+    "mongoose-unique-validator": "^0.4.1"
+  }
+}
