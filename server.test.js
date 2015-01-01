@@ -16,7 +16,7 @@ describe('directors-rest-api', function(){
 
 	//reset database between each test
 	beforeEach(function (done) {
-		server.listen(8080)
+	 server.listen(8080);
 	 function clearDB() {
 	   for (var i in mongoose.connection.collections) {
 	     mongoose.connection.collections[i].remove(function() {});

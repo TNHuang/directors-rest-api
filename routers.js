@@ -39,7 +39,7 @@ router.route("/directors")
 		//sending request to livestream.com
 		var lsRequst = https.get(lsUrl, function(lsRes){
 			var buffer = "",
-				data, attrs;
+				data;
 	
 			lsRes.on('data', function(chunk){
 				buffer += chunk;
@@ -118,5 +118,7 @@ router.route("/directors/:livestream_id")
 
 		});
 	});
+
+
 
 module.exports = router;
