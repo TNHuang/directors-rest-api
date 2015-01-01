@@ -1,9 +1,8 @@
-var superagent = require('superagent'),
+var server = require('./server'),
+	superagent = require('superagent'),
 	mongoose = require('mongoose'),
-	server = require('./server')
 	expect = require('expect.js');
 
-process.env.NODE_ENV = 'test';
 
 //utility require
 var str2md5 = require('./apps/shared/str2md5'),
@@ -13,10 +12,9 @@ describe('directors-rest-api', function(){
 	var id,
 		passHash = str2md5("James Cameron", function(e){ return e;});
 
-
+	server.listen(8080)
 	//reset database between each test
 	beforeEach(function (done) {
-	 server.listen(8080);
 	 function clearDB() {
 	   for (var i in mongoose.connection.collections) {
 	     mongoose.connection.collections[i].remove(function() {});
@@ -25,7 +23,7 @@ describe('directors-rest-api', function(){
 	 }
 
 	 if (mongoose.connection.readyState === 0) {
-	   mongoose.connect(config.db.test, function (err) {
+	   mongoose.connect("mongodb://127.0.0.1:27017/myDirectors", function (err) {
 	     if (err) {
 	       throw err;
 	     }
@@ -56,6 +54,7 @@ describe('directors-rest-api', function(){
 		superagent.post('http://localhost:8080/api/directors')
 			.send({ "livestream_id": 6488824})
 			.end( function(err, res){
+				
 				expect(err).to.eql(null);
 				expect(res.body.length).to.not.eql(null);
 				id = res.body.livestream_id;
