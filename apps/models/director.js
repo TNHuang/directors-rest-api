@@ -11,17 +11,21 @@ var directorSchema = mongoose.Schema({
 });
 
 //name uniquness validation
-directorSchema.pre("save", function(next, done){
-	var self = this;
-	this.models['Director'].findOne({ full_name: self.full_name}, function(err, results){
-		if (err) {
-			done(err);
-		} else if (results) {//found the name in the record, name already existed
-			self.invalidate("full_name", "name must be unique");
-			done(new Error("name must be unique"));
-		} else {
-			done();
-		}
-	});
-	next();
-});
+// directorSchema.pre("save", function(next, done){
+// 	var self = this;
+// 	this.models['Director'].findOne({ full_name: self.full_name}, function(err, results){
+// 		if (err) {
+// 			done(err);
+// 		} else if (results) {//found the name in the record, name already existed
+// 			self.invalidate("full_name", "name must be unique");
+// 			done(new Error("name must be unique"));
+// 		} else {
+// 			done();
+// 		}
+// 	});
+// 	next();
+// });
+directorSchema.plugin(uniqueValidator, { message: "Error livestream_id and/or full name must be unique"});
+
+
+module.exports = mongoose.model('Director', directorSchema);
