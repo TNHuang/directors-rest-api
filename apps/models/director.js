@@ -25,6 +25,8 @@ var directorSchema = mongoose.Schema({
 // 	});
 // 	next();
 // });
+
+
 directorSchema.plugin(uniqueValidator, { message: "Error livestream_id and/or full name must be unique"});
 
 
