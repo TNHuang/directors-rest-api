@@ -51,5 +51,6 @@ router.route("/directors")
 			});
 
 		});
-	})
+	});
 
+module.exports = router;
