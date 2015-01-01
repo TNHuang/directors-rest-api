@@ -1,20 +1,13 @@
 var superagent = require('superagent'),
 	server = require('./server'),
 	mongoose = require('mongoose'),
-	expect = require('expect.js'),
-	md5 = require('crypto').createHash('md5');
-
-
-//utility require
-var str2md5 = require('./apps/shared/str2md5'),
-	Director = require("./apps/models/director");
+	expect = require('expect.js');
 
 describe('directors-rest-api', function(){
 	var id,
-		passHash = md5.update("James Cameron").digest('base64');
+		passHash = require('crypto').createHash('md5').update("James Cameron").digest('base64');
 
 	//reset database between each test
-
 	before(function (done) {
 		 function clearDB() {
 		   for (var i in mongoose.connection.collections) {
@@ -36,14 +29,14 @@ describe('directors-rest-api', function(){
 	});
 
 	after(function (done) {
-	 mongoose.disconnect();
-	 server.close();
-	 return done();
+	 	mongoose.disconnect();
+	 	server.close();
+	 	return done();
 	});
 
 
 	//false postive test, should not be getting any account if livestream_id did not exist
-	it('should not return result for none-exisiting livestream_id', function(done){
+	it('should not return result for invalid livestream_id', function(done){
 		superagent.post('http://localhost:8080/api/directors')
 		.send({ "livestream_id": 0})
 		.end( function(err, res){
@@ -52,11 +45,11 @@ describe('directors-rest-api', function(){
 		});
 	});
 
+	//create 
 	it('post a new director', function(done){
 		superagent.post('http://localhost:8080/api/directors')
 			.send({ "livestream_id": 6488824})
 			.end( function(err, res){
-				
 				expect(err).to.eql(null);
 				expect(res.body.length).to.not.eql(null);
 				id = res.body.livestream_id;
@@ -64,6 +57,15 @@ describe('directors-rest-api', function(){
 			})
 	});
 
+	it('should not be able to duplicate a existing director', function(done){
+		superagent.post('http://localhost:8080/api/directors')
+			.send({ "livestream_id": 6488824})
+			.end( function(err, res){
+				expect(err).to.eql(null);
+				expect(res.body.message).to.eql("Director account already existed");
+				return done();
+			})
+	});
 	
 
 	it('retrieves a director with the correct information', function(done){
@@ -93,6 +95,23 @@ describe('directors-rest-api', function(){
 			});
 	});
 
+	// negative test for update authorization
+	it('should not updates with a wrong auth token', function(done){
+
+		superagent.put('http://localhost:8080/api/directors/' + id)
+			.set({'Authorization': "wrongToken" })
+			.send({
+				favorite_camera: "Sony F65",
+				favorite_movies: "Avatar1,Terminator1,Titanic1"
+			})
+			.end(function(err, res){
+
+				expect(err).to.eql(null);
+				expect(res.body.message).to.eql("Invalid Token");
+				return done();
+			});
+	})
+
 	//set up a sample test for updating director
 	it('updates an director', function(done){
 
@@ -100,7 +119,7 @@ describe('directors-rest-api', function(){
 			.set({'Authorization': passHash })
 			.send({
 				favorite_camera: "Sony F65",
-				favorite_movies: "Avatar, Terminator,Titanic"
+				favorite_movies: "Avatar,Terminator,Titanic"
 			})
 			.end(function(err, res){
 
@@ -110,47 +129,41 @@ describe('directors-rest-api', function(){
 			});
 	})
 
-	//negative test, cannot update if token is wrong
-	it('updates an director', function(done){
+	//check on update status
+	it('checks an updated director', function(done){
+		superagent.get('http://localhost:8080/api/directors/' + id)
+		.end(function(err, res){
+			expect(err).to.eql(null);
+			expect(typeof res.body).to.eql('object');
+			expect(res.body.favorite_camera).to.eql("Sony F65");
+			expect(res.body.favorite_movies).to.eql(["Avatar", "Terminator", "Titanic"]);
+			return done();
+		});
+	});
 
-		superagent.put('http://localhost:8080/api/directors/' + id)
-			.set({'Authorization': passHash })
-			.send({
-				favorite_camera: "Sony F65",
-				favorite_movies: "Avatar, Terminator,Titanic"
-			})
-			.end(function(err, res){
-
-				expect(err).to.eql(null);
-				expect(res.body.message).to.eql("Updated!");
-				return done();
-			});
+	// negative test for remove function
+	it('should not remove with a wrong auth token', function(done){
+		superagent.del('http://localhost:8080/api/directors/' + id)
+		.set({'Authorization': "wrongToken" })
+		.end(function(err, res){
+			expect(err).to.eql(null);
+			expect(typeof res.body).to.eql('object');
+			expect(res.body.message).to.eql('Invalid Token');
+			return done();
+		});
 	})
-	//negative test for trying to modify name and dob, also case for wrong password in the header
 
-	// //check on update status
-	// it('checks an updated director', function(done){
-	// 	superagent.get('http://localhost:8080/api/directors/' + id)
-	// 	.end(function(err, res){
-	// 		expect(err).to.eql(null);
-	// 		expect(typeof res.body).to.eql('object');
-	// 		expect(res.body.favorite_camera).to.eql("Sony F65");
-	// 		expect(res.body.favorite_movies).to.eql(["Avatar", "Terminator", "Titanic"]);
-	// 		return done();
-	// 	});
-	// });
+	//optional test, it remove the object
+	it('remove a director', function(done){
+		superagent.del('http://localhost:8080/api/directors/' + id)
+		.set({'Authorization': passHash })
+		.end(function(err, res){
+			expect(err).to.eql(null);
+			expect(typeof res.body).to.eql('object');
+			expect(res.body.message).to.eql('Success!');
+			return done();
+		});
+	});
 
-	// //optional test, it remove the object
-	// it('remove a director', function(done){
-	// 	superagent.del('http://localhost:8080/api/directors/' + id)
-	// 	.end(function(err, res){
-	// 		expect(err).to.eql(null);
-	// 		expect(typeof res.body).to.eql('object');
-	// 		expect(res.body.message).to.eql('Success!');
-	// 		return done();
-	// 	});
-	// });
-
-	//other nil positive test-> delete non existing record, deletion require authorization hash, etc
 
 });

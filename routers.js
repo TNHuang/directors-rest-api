@@ -6,50 +6,6 @@ var express = require('express'),
 
 var router = express.Router();
 
-//routers progress check for all router
-router.use(function(req, res, next){
-	console.log("stuff happening");
-	next();
-});
-
-//basic route test to make sure connection establish to http://localhost:8080/api
-router.get("/", function(req, res){
-	res.json({ message: "get request succeeds!"})
-});
-
-
-// var lsResHandler = function(data, req, res){
-// 	if (data.message && data.message === "Invalid account id") {
-// 		res.json({message: data.message});
-// 	} else {
-// 		var director = new Director ({
-// 			livestream_id: req.body.livestream_id,
-// 			full_name: data.full_name,
-// 			dob: data.dob				
-// 		});
-// 		director.save(function(err){
-// 			if(err) res.send(err);
-// 			res.json(director);
-// 		});
-// 	}
-// };
-
-// var lsRequest = function(URL, req, res){
-// 	https.get(URL, function(lsRes){
-// 		var buffer = "", data;
-// 		lsRes.on('data', function(chunk){
-// 			buffer += chunk;
-// 		});
-// 		lsRes.on('end', function(err){
-// 			data = JSON.parse(buffer);
-// 			lsResHandler(data, req, res)();
-// 		});
-// 	});
-// };
-
-
-
-
 //director post route and directors index route
 router.route("/directors")
 	.get( function(req, res){
@@ -64,10 +20,10 @@ router.route("/directors")
 
 		Director.find({ livestream_id: req.body.livestream_id}, function(err, directors){
 			if (directors.length > 0 ){
-				res.json({message: "prexisting director in database"})
+				res.json({message: "Director account already existed"})
 			} 
 		})
-		//should make this a call back or something
+
 		//sending request to livestream.com
 		var lsRequst = https.get(lsUrl, function(lsRes){
 			var buffer = "",
