@@ -7,31 +7,11 @@ var directorSchema = mongoose.Schema({
 	full_name: {type: String, required: true, unique: true},
 	dob: {type: Date},
 	favorite_camera: {type: String, default: "No preference"},
-	favorite_movies: [String],
-	passHash: {type: String}
+	favorite_movies: [String]
 });
 
-//name uniquness validation
-// directorSchema.pre("save", function(next, done){
-// 	var self = this;
-// 	this.models['Director'].findOne({ full_name: self.full_name}, function(err, results){
-// 		if (err) {
-// 			done(err);
-// 		} else if (results) {//found the name in the record, name already existed
-// 			self.invalidate("full_name", "name must be unique");
-// 			done(new Error("name must be unique"));
-// 		} else {
-// 			done();
-// 		}
-// 	});
-// 	next();
-// });
 
-//
-directorSchema.pre("save", function(next){
-	this.passHash = str2md5(this.full_name);
-	next();
-});
+directorSchema.plugin(uniqueValidator, { message: "Error, director with that name already existed"});
 
 
 module.exports = mongoose.model('Director', directorSchema);

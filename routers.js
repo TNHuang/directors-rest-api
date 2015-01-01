@@ -1,7 +1,8 @@
 var express = require('express'),
 	https = require('https'),
 	url = "https://api.new.livestream.com/accounts/",
-	Director = require("./apps/models/director");
+	Director = require("./apps/models/director"),
+	str2md5 = require("./apps/shared/str2md5");
 
 var router = express.Router();
 
@@ -28,6 +29,13 @@ router.route("/directors")
 	.post( function(req, res){
 		var lsUrl = url + req.body.livestream_id;
 
+		Director.find({ livestream_id: req.body.livestream_id}, function(err, directors){
+			if (directors.length > 0 ){
+				res.json({message: "prexisting director in database"})
+			}
+		});
+
+		//should make this a call back or something
 		//sending request to livestream.com
 		var lsRequst = https.get(lsUrl, function(lsRes){
 			var buffer = "",
@@ -48,11 +56,7 @@ router.route("/directors")
 						dob: data.dob				
 					});
 					director.save(function(err){
-						if (err && (err.code === 11000 || err.code === 11001) ){
-							res.json({message: "full_name is not unique"})
-						} else if (err){
-							res.send(err);
-						}
+						if(err) res.send(err);
 						res.json(director);
 					});
 				}
@@ -61,6 +65,58 @@ router.route("/directors")
 		});
 	});
 
+router.route("/directors/:livestream_id")
+	.get( function(req, res){
+		Director.findOne({
+			livestream_id: req.params.livestream_id
+		}, function(err, director){
+			if (err) res.send(err);
+			res.json(director);
+		});
+	})
+	//update the director account if authentication is valid
+	.put( function(req, res){
+		Director.findOne({
+			livestream_id: req.params.livestream_id
+		}, function(err, director){
+			if (err) res.send(err);
+			var dirName = director.full_name;
 
+			str2md5(dirName, function(hash){
+				if (hash === req.headers['authorization'] ){
+					Director.update({
+						favorite_movies: req.body.favorite_movies.split(","),
+						favorite_camera: req.body.favorite_camera
+					}, function(err){
+						res.json({message: "Updated!"})
+					});
+				} else {
+					res.json({message: "Invalid Token"});
+				}
+			});
+		});
+	})
+	//extra-function -> allow director delete if authorization token is legal
+	.delete( function(req, res){
+		Director.findOne({
+			livestream_id: req.params.livestream_id
+		}, function(err, director){
+			if (err) res.send(err);
+			var dirName = director.full_name;
+
+			str2md5(dirName, function(hash){
+				if (hash === req.headers['authorization'] ){
+					Director.remove({
+						livestream_id: req.params.livestream_id
+					}, function(err){
+						res.json({message: "Success!"})
+					});
+				} else {
+					res.json({message: "Invalid Token"});
+				}
+			});
+
+		});
+	});
 
 module.exports = router;

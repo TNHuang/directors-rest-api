@@ -16,7 +16,7 @@ app.use("/api", router);
 
 //listen to port via http, since express 4.0 don't bunlde http anymore
 var server = http.createServer(app).listen(port);
-
+server.timeout = 0;
 console.log("api listening on port ", port);
 
 //connect to localhost mongoDB server
