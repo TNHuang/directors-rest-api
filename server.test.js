@@ -1,5 +1,5 @@
-var server = require('./server'),
-	superagent = require('superagent'),
+var superagent = require('superagent'),
+	server = require('./server'),
 	mongoose = require('mongoose'),
 	expect = require('expect.js');
 
@@ -12,7 +12,7 @@ describe('directors-rest-api', function(){
 	var id,
 		passHash = str2md5("James Cameron", function(e){ return e;});
 
-	server.listen(8080)
+
 	//reset database between each test
 	beforeEach(function (done) {
 	 function clearDB() {
