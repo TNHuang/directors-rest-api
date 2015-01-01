@@ -20,6 +20,7 @@ var server = http.createServer(app).listen(port);
 console.log("api listening on port ", port);
 
 //connect to localhost mongoDB server
+//change the address if you want to connect to different db
 mongoose.connect('mongodb://127.0.0.1:27017/myDirectors');
 
 //expose the server

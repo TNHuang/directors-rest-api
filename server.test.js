@@ -3,9 +3,9 @@ var superagent = require('superagent'),
 	mongoose = require('mongoose'),
 	expect = require('expect.js');
 
-describe('directors-rest-api', function(){
-	var id,
-		passHash = "Bear " + require('crypto').createHash('md5').update("James Cameron").digest('base64');
+describe('directors-rest-api CRUD tests', function(){
+	var id;
+	var passHash = "Bearer " + require('crypto').createHash('md5').update("James Cameron").digest('base64');
 
 	//reset database between each test
 	before(function (done) {
@@ -36,7 +36,7 @@ describe('directors-rest-api', function(){
 
 
 	//false postive test, should not be getting any account if livestream_id did not exist
-	it('should not return result for invalid livestream_id', function(done){
+	it('livestream id validation=> should not return result for invalid id', function(done){
 		superagent.post('http://localhost:8080/api/directors')
 		.send({ "livestream_id": 0})
 		.end( function(err, res){
@@ -45,7 +45,6 @@ describe('directors-rest-api', function(){
 		});
 	});
 
-	//create 
 	it('post a new director', function(done){
 		superagent.post('http://localhost:8080/api/directors')
 			.send({ "livestream_id": 6488824})
@@ -57,7 +56,7 @@ describe('directors-rest-api', function(){
 			})
 	});
 
-	it('should not be able to duplicate a existing director', function(done){
+	it('director uniquness validation => should be unable to make duplicate director', function(done){
 		superagent.post('http://localhost:8080/api/directors')
 			.send({ "livestream_id": 6488824})
 			.end( function(err, res){
@@ -96,7 +95,7 @@ describe('directors-rest-api', function(){
 	});
 
 	// negative test for update authorization
-	it('should be unable to update with a wrong auth token', function(done){
+	it('update authorization validation => should be unable to update if given the wrong token', function(done){
 
 		superagent.put('http://localhost:8080/api/directors/' + id)
 			.set({'Authorization': "wrongToken" })
@@ -130,7 +129,7 @@ describe('directors-rest-api', function(){
 	})
 
 	//check on update status
-	it('checks an updated director for updated information', function(done){
+	it('checks an updated director for correct updated information', function(done){
 		superagent.get('http://localhost:8080/api/directors/' + id)
 			.end(function(err, res){
 				expect(err).to.eql(null);
@@ -142,7 +141,7 @@ describe('directors-rest-api', function(){
 	});
 
 	// negative test for remove function
-	it('should not remove with a wrong auth token', function(done){
+	it('delete authorization validation=> should be unable to delete with wrong token', function(done){
 		superagent.del('http://localhost:8080/api/directors/' + id)
 			.set({'Authorization': "wrongToken" })
 			.end(function(err, res){

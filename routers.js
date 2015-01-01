@@ -8,6 +8,7 @@ var router = express.Router();
 
 //director post route and directors index route
 router.route("/directors")
+	//shows all the registered directors
 	.get( function(req, res){
 		Director.find(function(err, directors){
 			if (err) res.send(err);
@@ -50,7 +51,7 @@ router.route("/directors")
 				}
 			});
 			
-		});
+		});// livestream request end
 	});
 
 router.route("/directors/:livestream_id")
@@ -84,7 +85,7 @@ router.route("/directors/:livestream_id")
 			});
 		});
 	})
-	//extra-function -> allow director delete if authorization token is legal
+	//delete function -> allow director delete if authorization token is legal
 	.delete( function(req, res){
 		Director.findOne({
 			livestream_id: req.params.livestream_id
