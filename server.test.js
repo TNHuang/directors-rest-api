@@ -5,7 +5,7 @@ var superagent = require('superagent'),
 
 describe('directors-rest-api', function(){
 	var id,
-		passHash = require('crypto').createHash('md5').update("James Cameron").digest('base64');
+		passHash = "Bear " + require('crypto').createHash('md5').update("James Cameron").digest('base64');
 
 	//reset database between each test
 	before(function (done) {
@@ -68,7 +68,7 @@ describe('directors-rest-api', function(){
 	});
 	
 
-	it('retrieves a director with the correct information', function(done){
+	it('retrieve a director with the correct information', function(done){
 		superagent.get('http://localhost:8080/api/directors/' + id)
 			.end(function(err, res){
 				//console.log(res.body);
@@ -82,7 +82,7 @@ describe('directors-rest-api', function(){
 			});
 	});
 
-	it('retrieves a collection of directors', function(done){
+	it('retrieve a collection of directors', function(done){
 		superagent.get("http://localhost:8080/api/directors")
 			.end(function(err, res){
 				//console.log(res.body);
@@ -96,7 +96,7 @@ describe('directors-rest-api', function(){
 	});
 
 	// negative test for update authorization
-	it('should not updates with a wrong auth token', function(done){
+	it('should be unable to update with a wrong auth token', function(done){
 
 		superagent.put('http://localhost:8080/api/directors/' + id)
 			.set({'Authorization': "wrongToken" })
@@ -130,39 +130,39 @@ describe('directors-rest-api', function(){
 	})
 
 	//check on update status
-	it('checks an updated director', function(done){
+	it('checks an updated director for updated information', function(done){
 		superagent.get('http://localhost:8080/api/directors/' + id)
-		.end(function(err, res){
-			expect(err).to.eql(null);
-			expect(typeof res.body).to.eql('object');
-			expect(res.body.favorite_camera).to.eql("Sony F65");
-			expect(res.body.favorite_movies).to.eql(["Avatar", "Terminator", "Titanic"]);
-			return done();
-		});
+			.end(function(err, res){
+				expect(err).to.eql(null);
+				expect(typeof res.body).to.eql('object');
+				expect(res.body.favorite_camera).to.eql("Sony F65");
+				expect(res.body.favorite_movies).to.eql(["Avatar", "Terminator", "Titanic"]);
+				return done();
+			});
 	});
 
 	// negative test for remove function
 	it('should not remove with a wrong auth token', function(done){
 		superagent.del('http://localhost:8080/api/directors/' + id)
-		.set({'Authorization': "wrongToken" })
-		.end(function(err, res){
-			expect(err).to.eql(null);
-			expect(typeof res.body).to.eql('object');
-			expect(res.body.message).to.eql('Invalid Token');
-			return done();
-		});
+			.set({'Authorization': "wrongToken" })
+			.end(function(err, res){
+				expect(err).to.eql(null);
+				expect(typeof res.body).to.eql('object');
+				expect(res.body.message).to.eql('Invalid Token');
+				return done();
+			});
 	})
 
 	//optional test, it remove the object
 	it('remove a director', function(done){
 		superagent.del('http://localhost:8080/api/directors/' + id)
-		.set({'Authorization': passHash })
-		.end(function(err, res){
-			expect(err).to.eql(null);
-			expect(typeof res.body).to.eql('object');
-			expect(res.body.message).to.eql('Success!');
-			return done();
-		});
+			.set({'Authorization': passHash })
+			.end(function(err, res){
+				expect(err).to.eql(null);
+				expect(typeof res.body).to.eql('object');
+				expect(res.body.message).to.eql('Success!');
+				return done();
+			});
 	});
 
 
