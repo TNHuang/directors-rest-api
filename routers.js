@@ -82,7 +82,7 @@ router.route("/directors/:livestream_id")
 		}, function(err, director){
 			if (err) res.send(err);
 			var dirName = director.full_name;
-
+			//how to handle not found error
 			str2md5(dirName, function(hash){
 				if (hash === req.headers['authorization'] ){
 					Director.update({
