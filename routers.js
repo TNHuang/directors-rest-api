@@ -1,8 +1,7 @@
 var express = require('express'),
-	http = require('http'),
+	https = require('https'),
 	url = "https://api.new.livestream.com/accounts/",
-	Director = require("./apps/models/director"),
-	str2md5 = require("./apps/shared/str2md5"); //md5 hasing
+	Director = require("./apps/models/director");
 
 var router = express.Router();
 
@@ -30,27 +29,38 @@ router.route("/directors")
 		var lsUrl = url + req.body.livestream_id;
 
 		//sending request to livestream.com
-		var lsRequst = http.get(url, function(lsRes){
+		var lsRequst = https.get(lsUrl, function(lsRes){
 			var buffer = "",
 				data, attrs;
+	
 			lsRes.on('data', function(chunk){
 				buffer += chunk;
 			});
 			lsRes.on('end', function(err){
 				data = JSON.parse(buffer);
-				var director = new Director ({
-					livestream_id: data.livestream_id,
-					full_name: data.full_name,
-					dob: data.dob,
-					passHash: str2md5(data.full_name)
-				});
-				director.save(function(err){
-					if (err) res.send(err);
-					res.json(director);
-				});
+				//if invalid account id -> skip create director
+				if (data.message && data.message === "Invalid account id") {
+					res.json({message: data.message});
+				} else {
+					var director = new Director ({
+						livestream_id: req.body.livestream_id,
+						full_name: data.full_name,
+						dob: data.dob				
+					});
+					director.save(function(err){
+						if (err && (err.code === 11000 || err.code === 11001) ){
+							res.json({message: "full_name is not unique"})
+						} else if (err){
+							res.send(err);
+						}
+						res.json(director);
+					});
+				}
 			});
 
 		});
 	});
+
+
 
 module.exports = router;

@@ -1,11 +1,12 @@
 var mongoose = require('mongoose'),
-	uniqueValidator = require('mongoose-unique-validator');
+	uniqueValidator = require('mongoose-unique-validator'),
+	str2md5 = require("../shared/str2md5");
 
 var directorSchema = mongoose.Schema({
 	livestream_id: {type: String, required: true, unique: true},
 	full_name: {type: String, required: true, unique: true},
 	dob: {type: Date},
-	favorite_camera: {type: String},
+	favorite_camera: {type: String, default: "No preference"},
 	favorite_movies: [String],
 	passHash: {type: String}
 });
@@ -26,8 +27,11 @@ var directorSchema = mongoose.Schema({
 // 	next();
 // });
 
-
-directorSchema.plugin(uniqueValidator, { message: "Error livestream_id and/or full name must be unique"});
+//
+directorSchema.pre("save", function(next){
+	this.passHash = str2md5(this.full_name);
+	next();
+});
 
 
 module.exports = mongoose.model('Director', directorSchema);

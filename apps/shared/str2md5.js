@@ -3,7 +3,7 @@ var crypto = require('crypto'),
 
 //convert str to md5 hash
 function str2md5(str){
-	return myMd5.update(str).digest('hex');
+	return myMd5.update(str).digest('hex').toString();
 }
 
 module.exports = str2md5;

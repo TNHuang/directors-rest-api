@@ -15,8 +15,12 @@ app.use( bodyParser.json());
 app.use("/api", router);
 
 //listen to port via http, since express 4.0 don't bunlde http anymore
-http.createServer(app).listen(port);
+var server = http.createServer(app).listen(port);
+
 console.log("api listening on port ", port);
 
 //connect to localhost mongoDB server
-moongoose.connect('mongodb://127.0.0.1:27017/myDirectors');
+mongoose.connect('mongodb://127.0.0.1:27017/myDirectors');
+
+//expose the server
+module.exports = server;
