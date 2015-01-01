@@ -3,23 +3,7 @@ var express = require('express'),
 	app = express(),
 	bodyParser = require('body-parser'),
 	mongoose = require('mongoose'),
-	router = require('./routers'),
-	uri = 'mongodb://127.0.0.1:27017/myDirectors';
-
-//connect to localhost mongoDB server
-options = { server:{
-			auto_reconnect: true,
-			poolSize: 10,
-			socketOptions: {
-				keepAlive: 1
-			}
-		},
-		db: {
-			numberOfRetries: 10,
-			retryMiliSeconds: 1000
-		}
-	};
-mongoose.createConnection(uri, options);
+	router = require('./routers');
 
 var port = process.env.PORT || 8080;
 
@@ -35,7 +19,8 @@ var server = http.createServer(app).listen(port);
 
 console.log("api listening on port ", port);
 
-
+//connect to localhost mongoDB server
+mongoose.connect('mongodb://127.0.0.1:27017/myDirectors');
 
 //expose the server
 module.exports = server;

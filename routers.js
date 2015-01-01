@@ -32,37 +32,38 @@ router.route("/directors")
 		Director.find({ livestream_id: req.body.livestream_id}, function(err, directors){
 			if (directors.length > 0 ){
 				res.json({message: "prexisting director in database"})
+			} else {
+				lsRequest(lsUrl)();
 			}
-		});
-
+		})
 		//should make this a call back or something
 		//sending request to livestream.com
-		var lsRequst = https.get(lsUrl, function(lsRes){
-			var buffer = "",
-				data;
+		// var lsRequst = https.get(lsUrl, function(lsRes){
+		// 	var buffer = "",
+		// 		data;
 	
-			lsRes.on('data', function(chunk){
-				buffer += chunk;
-			});
-			lsRes.on('end', function(err){
-				data = JSON.parse(buffer);
-				//if invalid account id -> skip create director
-				if (data.message && data.message === "Invalid account id") {
-					res.json({message: data.message});
-				} else {
-					var director = new Director ({
-						livestream_id: req.body.livestream_id,
-						full_name: data.full_name,
-						dob: data.dob				
-					});
-					director.save(function(err){
-						if(err) res.send(err);
-						res.json(director);
-					});
-				}
-			});
-
-		});
+		// 	lsRes.on('data', function(chunk){
+		// 		buffer += chunk;
+		// 	});
+		// 	lsRes.on('end', function(err){
+		// 		data = JSON.parse(buffer);
+		// 		//if invalid account id -> skip create director
+		// 		if (data.message && data.message === "Invalid account id") {
+		// 			res.json({message: data.message});
+		// 		} else {
+		// 			var director = new Director ({
+		// 				livestream_id: req.body.livestream_id,
+		// 				full_name: data.full_name,
+		// 				dob: data.dob				
+		// 			});
+		// 			director.save(function(err){
+		// 				if(err) res.send(err);
+		// 				res.json(director);
+		// 			});
+		// 		}
+		// 	});
+			
+		// });
 	});
 
 router.route("/directors/:livestream_id")
@@ -81,7 +82,7 @@ router.route("/directors/:livestream_id")
 		}, function(err, director){
 			if (err) res.send(err);
 			var dirName = director.full_name;
-
+			//how to handle not found error
 			str2md5(dirName, function(hash){
 				if (hash === req.headers['authorization'] ){
 					Director.update({
@@ -120,5 +121,33 @@ router.route("/directors/:livestream_id")
 	});
 
 
+var lsRequst = function(URL){
+	https.get(URL, function(lsRes){
+		var buffer = "", data;
+		lsRes.on('data', function(chunk){
+			buffer += chunk;
+		});
+		lsRes.on('end', function(err){
+			data = JSON.parse(buffer);
+			lsResHandler(data)();
+		});
+	});
+};
+
+var lsResHandler = function(data){
+	if (data.message && data.message === "Invalid account id") {
+		res.json({message: data.message});
+	} else {
+		var director = new Director ({
+			livestream_id: req.body.livestream_id,
+			full_name: data.full_name,
+			dob: data.dob				
+		});
+		director.save(function(err){
+			if(err) res.send(err);
+			res.json(director);
+		});
+	}
+};
 
 module.exports = router;
