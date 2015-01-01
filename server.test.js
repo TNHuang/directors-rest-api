@@ -15,8 +15,8 @@ describe('directors-rest-api', function(){
 
 
 	//reset database between each test
-	beforeEach(function (done) {
-	 server.listen(8080);
+	before(function (done) {
+
 	 function clearDB() {
 	   for (var i in mongoose.connection.collections) {
 	     mongoose.connection.collections[i].remove(function() {});
@@ -36,8 +36,9 @@ describe('directors-rest-api', function(){
 	 }
 	});
 
-	afterEach(function (done) {
+	after(function (done) {
 	 mongoose.disconnect();
+	 server.close();
 	 return done();
 	});
 
@@ -63,7 +64,7 @@ describe('directors-rest-api', function(){
 			})
 	});
 
-	// //post an existing record should get an 11000 error
+	
 
 	it('retrieves a director with the correct information', function(done){
 		superagent.get('http://localhost:8080/api/directors/' + id)
@@ -101,6 +102,7 @@ describe('directors-rest-api', function(){
 				favorite_movies: ["Avatar", "Terminator", "Titanic"]
 			})
 			.end(function(err, res){
+				console.log("hash",passHash)
 				expect(err).to.eql(null);
 				expect(res.body.message).to.eql("Updated!");
 				return done();
