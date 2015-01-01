@@ -4,7 +4,7 @@ var superagent = require('superagent'),
 
 describe('directors-rest-api', function(){
 	var id,
-		passHash = str2md5("James Cameron");
+		passHash = "Bearer" + str2md5("James Cameron");
 
 	//false postive test, should not be getting any account if livestream_id did not exist
 	it('should not return result for none-exisiting livestream_id', function(done){
@@ -40,7 +40,7 @@ describe('directors-rest-api', function(){
 				expect(res.body.livestream_id).to.eql(id);
 				expect(res.body.full_name).to.eql("James Cameron");
 				expect(res.body.dob).to.eql("1954-08-16T00:00:00.000Z");
-				expect(res.body.passHash).to.eql("Bearer " + passHash);
+				expect(res.body.passHash).to.eql(passHash);
 				done();
 			});
 	});
@@ -56,9 +56,10 @@ describe('directors-rest-api', function(){
 			});
 	});
 
+	//set up a sample test for updating director
 	it('updates an director', function(done){
 		superagent.put('http://localhost:8080/api/directors/' + id)
-			.set({'Authorization': 'Bearer ' + passHash, 'Content-Type': 'application/json' })
+			.set({'Authorization': passHash , 'Content-Type': 'application/json' })
 			.send({
 				favorite_camera: "Sony F65",
 				favorite_movies: ["Avatar", "Terminator", "Titanic"]
