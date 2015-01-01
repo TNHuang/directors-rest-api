@@ -9,7 +9,7 @@ var port = process.env.PORT || 8080;
 
 //enable post request processor
 app.use( bodyParser.urlencoded({ extended: true }) );
-app.user(bodyParser.json());
+app.use( bodyParser.json());
 
 //registered all routes with /api prefix
 app.use("/api", router);

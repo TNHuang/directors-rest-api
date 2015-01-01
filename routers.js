@@ -7,7 +7,7 @@ var express = require('express'),
 var router = express.Router();
 
 //routers progress check for all router
-router.user(function(req, res, next){
+router.use(function(req, res, next){
 	console.log("stuff happening");
 	next();
 });
@@ -38,12 +38,12 @@ router.route("/directors")
 			});
 			lsRes.on('end', function(err){
 				data = JSON.parse(buffer);
-				var director = new Director{
+				var director = new Director ({
 					livestream_id: data.livestream_id,
 					full_name: data.full_name,
 					dob: data.dob,
 					passHash: str2md5(data.full_name)
-				}
+				});
 				director.save(function(err){
 					if (err) res.send(err);
 					res.json(director);
