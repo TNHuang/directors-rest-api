@@ -27,6 +27,29 @@ router.route("/directors")
 	})
 	//create a director by passing a livestream_id
 	.post( function(req, res){
-		var livestream_id = req.body.livestream_id;
+		var lsUrl = url + req.body.livestream_id;
 
+		//sending request to livestream.com
+		var lsRequst = http.get(url, function(lsRes){
+			var buffer = "",
+				data, attrs;
+			lsRes.on('data', function(chunk){
+				buffer += chunk;
+			});
+			lsRes.on('end', function(err){
+				data = JSON.parse(buffer);
+				var director = new Director{
+					livestream_id: data.livestream_id,
+					full_name: data.full_name,
+					dob: data.dob,
+					passHash: str2md5(data.full_name)
+				}
+				director.save(function(err){
+					if (err) res.send(err);
+					res.json(director);
+				});
+			});
+
+		});
 	})
+
