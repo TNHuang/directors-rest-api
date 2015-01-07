@@ -110,10 +110,10 @@ function livestreamRequest(res, req, lsUrl) {
 		lsRes.on('end', function(err){
 			try {
 				data = JSON.parse(buffer);
-
+				
 				//if invalid account id -> skip create director
-				if (data.message && data.message === "Invalid account id") {
-					res.json({message: data.message});
+				if (lsRes.statusCode === 404 || lsRes.statusCode === 400) {
+					res.json({message: "Invalid account Id"});
 				} else if( data.full_name === undefined || data.dob === undefined ){
 					res.json({ message: "Invalid field format"});
 				} else {
