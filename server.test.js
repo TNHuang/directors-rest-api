@@ -104,8 +104,7 @@ describe('directors-rest-api CRUD tests', function(){
 				favorite_movies: "Avatar1,Terminator1,Titanic1"
 			})
 			.end(function(err, res){
-
-				expect(err).to.eql(null);
+				expect(res.statusCode).to.eql(401);
 				expect(res.body.message).to.eql("Invalid Token");
 				return done();
 			});
@@ -145,8 +144,7 @@ describe('directors-rest-api CRUD tests', function(){
 		superagent.del('http://localhost:8080/api/directors/' + id)
 			.set({'Authorization': "wrongToken" })
 			.end(function(err, res){
-				expect(err).to.eql(null);
-				expect(typeof res.body).to.eql('object');
+				expect(res.statusCode).to.eql(401);
 				expect(res.body.message).to.eql('Invalid Token');
 				return done();
 			});
