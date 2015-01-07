@@ -162,5 +162,14 @@ describe('directors-rest-api CRUD tests', function(){
 			});
 	});
 
+	it('Invalid response format validation => invalid res format should not save into database', function(done){
+		superagent.post('http://localhost:8080/api/directors/')
+			.send({ "livestream_id": "xxxx"})
+			.end(function(err, res){
+				expect(res.body.message).to.eql('Invalid field format');
+				done();
+			});
+	});
+
 
 });

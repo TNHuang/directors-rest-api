@@ -64,6 +64,7 @@ router.route("/directors/:livestream_id")
 						favorite_movies: req.body.favorite_movies.split(","),
 						favorite_camera: req.body.favorite_camera
 					}, function(err){
+						if (err) res.send(err);
 						res.json({message: "Updated!"})
 					});
 				} else {
@@ -95,7 +96,7 @@ router.route("/directors/:livestream_id")
 		});
 	});
 
-function livestreamRequest(res, req, lsUrl){
+function livestreamRequest(res, req, lsUrl) {
 	// console.log("res:", res, "req:", req, "url:", lsUrl)
 	//sending request to livestream.com
 	var lsRequst = https.get(lsUrl, function(lsRes){
@@ -107,25 +108,37 @@ function livestreamRequest(res, req, lsUrl){
 		});
 		
 		lsRes.on('end', function(err){
+			try {
+				data = JSON.parse(buffer);
 
-			data = JSON.parse(buffer);
-			//if invalid account id -> skip create director
-			if (data.message && data.message === "Invalid account id") {
-				res.json({message: data.message});
-			} else {
-				var director = new Director ({
-					livestream_id: req.body.livestream_id,
-					full_name: data.full_name,
-					dob: data.dob				
-				});
-				director.save(function(err){
-					if(err) res.send(err);
-					res.json(director);
-				});
+				//if invalid account id -> skip create director
+				if (data.message && data.message === "Invalid account id") {
+					res.json({message: data.message});
+				} else if( data.full_name === undefined || data.dob === undefined ){
+					res.json({ message: "Invalid field format"});
+				} else {
+					createDirector(req, res, data);
+				} 
+			} catch(err) {
+				res.json({message: "Invalid json format"});
 			}
+
 		});
 		
 	});// livestream request end	
+};
+
+function createDirector(req, res, data){
+	var director = new Director ({
+		livestream_id: req.body.livestream_id,
+		full_name: data.full_name,
+		dob: data.dob				
+	});
+	director.save(function(err){
+		if(err) res.send(err);
+		res.json(director);
+	});
 }
+
 
 module.exports = router;
